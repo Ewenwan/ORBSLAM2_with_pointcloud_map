@@ -96,7 +96,66 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 > 7. pointcloudmapping.cc 源文件分析
 
 
+> 8. CMakeLists.txt 修改
 
+     SET(CMAKE_EXPORT_COMPILE_COMMANDS "ON") // 使用此选项，cmake会生成一个JSON文件，其中包含包含路径
+                                             // 生成一个JSON编译数据库。
+                                             // 编译数据库JSON文件是在 cmake 执行时生成的，而不是在 make 编译 时生成。
+     
+     # adding for point cloud viewer and mapper
+     find_package( PCL 1.7 REQUIRED )        // 添加pcl 库
+     include_directories(
+     ${PROJECT_SOURCE_DIR}
+     ${PROJECT_SOURCE_DIR}/include
+     ${EIGEN3_INCLUDE_DIR}
+     ${Pangolin_INCLUDE_DIRS}
+     ${PCL_INCLUDE_DIRS}                     // 库文件 
+     )
+
+     add_definitions( ${PCL_DEFINITIONS} )   // 添加 pcl 定义
+     link_directories( ${PCL_LIBRARY_DIRS} ) // 添加 pcl 库依赖
+
+     add_library(${PROJECT_NAME} SHARED      // shared 动态链接库
+     src/System.cc
+     src/Tracking.cc
+     src/LocalMapping.cc
+     src/LoopClosing.cc
+     src/ORBextractor.cc
+     src/ORBmatcher.cc
+     src/FrameDrawer.cc
+     src/Converter.cc
+     src/MapPoint.cc
+     src/KeyFrame.cc
+     src/Map.cc
+     src/MapDrawer.cc
+     src/Optimizer.cc
+     src/PnPsolver.cc
+     src/Frame.cc
+     src/KeyFrameDatabase.cc
+     src/Sim3Solver.cc
+     src/Initializer.cc
+     src/Viewer.cc
+     src/pointcloudmapping.cc               // 添加一个文件  
+     )
+
+     target_link_libraries(${PROJECT_NAME}  // 动态库添加 链接
+     ${OpenCV_LIBS}
+     ${EIGEN3_LIBS}
+     ${Pangolin_LIBRARIES}
+     ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+     ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+     ${PCL_LIBRARIES}                       // 点云库链接
+     )
+     
+     set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin) // 编译后的可执行文件 存放的目录
+
+     # Build tools
+     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/tools)  // 工具 可执行文件存放目录
+     add_executable(bin_vocabulary
+     tools/bin_vocabulary.cc)
+     target_link_libraries(bin_vocabulary ${PROJECT_NAME}) // 链接
+     
+     
 ```
     
     
