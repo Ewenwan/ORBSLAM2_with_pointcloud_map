@@ -40,7 +40,7 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
 > 1. 参数配置文件多了一个 点云地图精度参数
 
-     PointCloudMapping.Resolution: 0.01
+     PointCloudMapping.Resolution: 0.01        // 体素格滤波对象 参数 体素格子大小
 > 2. 二进制方式载入特征词典函数
 
      /Thirdparty/DBoW2/DBoW2/TemplatedVocabulary.h  1450-1460行
@@ -199,7 +199,7 @@ protected:
     uint16_t                lastKeyframeSize =0;
 
     double resolution = 0.04;      // 默认点云地图精度    用于设置体素格子的边长大小
-    pcl::VoxelGrid<PointT>  voxel; // 点对应的 体素格对象
+    pcl::VoxelGrid<PointT>  voxel; // 点对应的 体素格滤波对象
 };
  
 
