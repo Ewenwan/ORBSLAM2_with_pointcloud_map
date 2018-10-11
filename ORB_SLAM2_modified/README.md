@@ -32,7 +32,7 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
 * 1. 以二进制方式载入特征词典
 
-* 2. 添加一个点云可视化器(增加一个可视化线程 viewer thread) 
+* 2. 添加一个点云可视化器(增加一个可视化线程 viewer thread) ，只用关键帧来建立点云地图
 
 * 3. 编译方式修改，修改 CMakeLists.txt 所以的可执行文件放入 ./bin
 
@@ -76,7 +76,7 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
                   KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
                   // 多添加了一个 构建点云地图类的一个共享指针 shared_ptr 作为参数
          
-         // public 类型的 成员变量 多了一个 用于点云可视化  106行
+         // public 类型的 成员变量 多了一个 深度图（原来的深度图为一个局部变量）  106行
          cv::Mat mImDepth; // adding mImDepth member to realize pointcloud view
          
          // protected 类型的 成员变量 多了一个 构建点云地图类的一个共享指针  228行
@@ -85,19 +85,89 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
          
     c. 构建点云地图类 头文件
          ORB_SLAM2-pc/include/pointcloudmapping.h
-
+```
 > 5. System.cc 源文件修改
+```c
+    // 后缀查找   29行
+     #include <time.h>
+     // 找后缀，str中是否有 suffix 字符串 可以获取文件的类型
+     bool has_suffix(const std::string &str, const std::string &suffix) 
+     {
+          std::size_t index = str.find(suffix, str.size() - suffix.size());
+          return (index != std::string::npos);
+     }
+     
+    // 读取 点云地图精度配置参数      68行
+     // for point cloud resolution
+     float resolution = fsSettings["PointCloudMapping.Resolution"]; // 配置文件中的参数 0.01
+    
+    // 两种方式读取 特征字典文件      74行
+     if (has_suffix(strVocFile, ".txt"))
+          bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);  // txt类型的字典文件
+     else
+          bVocLoad = mpVocabulary->loadFromBinaryFile(strVocFile);// bin二进制类型的文件
+   
+    // 初始化  构建点云地图类 共享智能指针   99行
+     // Initialize pointcloud mapping
+     mpPointCloudMapping = make_shared<PointCloudMapping>( resolution );
+     
+    // Tracking 跟踪类 初始化 有变化，多传入一个 构建点云地图类 共享智能指针 mpPointCloudMapping  104行
+     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
+         mpMap, mpPointCloudMapping, mpKeyFrameDatabase, strSettingsFile, mSensor);
+     
+    void System::Shutdown()  // 类退出(关闭)函数
+    {
+        ...
+         mpPointCloudMapping->shutdown(); // 添加一个 构建点云地图类 的 关闭函数
+        ...
+    }
+
+```
+> 6. Tracking.cc 文件修改分析
+```c
+          // Tracking线程类 构造函数接口修改 46行
+          Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,
+                  KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+                  
+          >>>> 修改成 
+          Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,     
+                  shared_ptr<PointCloudMapping> pPointCloud,
+                  KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+                  // 多添加了一个 构建点云地图类的一个共享指针 shared_ptr 作为参数
+          
+          // public 类型的 成员变量 多了一个 深度图（原来的深度图为一个局部变量） 210行
+          cv::Mat imDepth = imD;// 原来的深度图为一个局部变量
+          // 改成一个类内部 成员变量
+          mImDepth = imD;
+          
+          // 后面有关的 imDepth 都变成 mImDepth
+          if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
+               imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);// 转换深度图精度
+               
+          // 创建当前帧
+          mCurrentFrame =    
+          Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
 
-> 6. Tracking.cc 源文件修改
-
+void Tracking::CreateNewKeyFrame() // 创建关键帧 函数
+{
+     ...
+     // insert Key Frame into point cloud viewer
+     mpPointCloudMapping->insertKeyFrame( pKF, this->mImGray, this->mImDepth );// 在点云地图里插入该关键帧
+     ...       
+}
+```
 
 
 > 7. pointcloudmapping.cc 源文件分析
+```c
 
+
+
+```
 
 > 8. CMakeLists.txt 修改
-
+```c
      SET(CMAKE_EXPORT_COMPILE_COMMANDS "ON") // 使用此选项，cmake会生成一个JSON文件，其中包含包含路径
                                              // 生成一个JSON编译数据库。
                                              // 编译数据库JSON文件是在 cmake 执行时生成的，而不是在 make 编译 时生成。
@@ -154,8 +224,6 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
      add_executable(bin_vocabulary
      tools/bin_vocabulary.cc)
      target_link_libraries(bin_vocabulary ${PROJECT_NAME}) // 链接
-     
-     
 ```
     
     
