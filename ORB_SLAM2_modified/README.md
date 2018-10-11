@@ -38,5 +38,13 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
 # 修改细节
 
+> 1. 参数配置文件多了一个 点云地图精度参数
 
+     PointCloudMapping.Resolution: 0.01
+> 2. 二进制方式载入特征词典函数
 
+     /Thirdparty/DBoW2/DBoW2/TemplatedVocabulary.h  1450-1460行
+
+     二进制方式载入特征词典 bool TemplatedVocabulary<TDescriptor,F>::loadFromBinaryFile(const std::string &filename) {}
+     二进制方式保存特征词典 void TemplatedVocabulary<TDescriptor,F>::saveToBinaryFile(const std::string &filename) const {}
+ 
