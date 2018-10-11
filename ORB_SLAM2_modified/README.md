@@ -47,4 +47,12 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
      二进制方式载入特征词典 bool TemplatedVocabulary<TDescriptor,F>::loadFromBinaryFile(const std::string &filename) {}
      二进制方式保存特征词典 void TemplatedVocabulary<TDescriptor,F>::saveToBinaryFile(const std::string &filename) const {}
- 
+
+> 3. g2o版本问题提示，需要 存储矩阵为列优先存储的版本
+
+    /Thirdparty/g2o/config.h
+
+> 4. 
+
+
+
