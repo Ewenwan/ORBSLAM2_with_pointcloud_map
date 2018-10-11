@@ -30,8 +30,13 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
 # What are modified:
 
-* changing the vocabulary loading method into binary mod
+* 1. 以二进制方式载入特征词典
 
-* adding a pointcloud viewer( realized by adding a viewer thread )
+* 2. 添加一个点云可视化器(增加一个可视化线程 viewer thread) 
 
-* changing the CMakeLists.txt that all the executable files are placed in ./bin
+* 3. 编译方式修改，修改 CMakeLists.txt 所以的可执行文件放入 ./bin
+
+# 修改细节
+
+
+
