@@ -52,7 +52,36 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
     /Thirdparty/g2o/config.h
 
-> 4. 
+> 4. 点云可视化器 类 线程 等修改
 
-
-
+    ORB_SLAM2-pc/include/System.h  39行  和 180行
+          // for point cloud viewing     39行
+          #include "pointcloudmapping.h" // 包含 构建点云地图 头文件
+          class PointCloudMapping;       // 声明 构建点云地图类
+          
+          // point cloud mapping        180行
+          shared_ptr<PointCloudMapping> mpPointCloudMapping; // 构建点云地图类的一个共享指针 shared_ptr
+          
+    ORB_SLAM2-pc/include/Tracking.h  42行 和 
+          // for pointcloud mapping and viewing   42 行
+          #include "pointcloudmapping.h" // 包含 构建点云地图 头文件
+          class PointCloudMapping;       // 声明 构建点云地图类
+          
+          // Tracking线程类 构造函数接口修改  63行
+          Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,
+                  KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+          >>>> 修改成 
+          Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,     
+                  shared_ptr<PointCloudMapping> pPointCloud,
+                  KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+                  // 多添加了一个 构建点云地图类的一个共享指针 shared_ptr 作为参数
+         
+         // public 类型的 成员变量 多了一个 用于点云可视化  106行
+         cv::Mat mImDepth; // adding mImDepth member to realize pointcloud view
+         
+         // protected 类型的 成员变量 多了一个 构建点云地图类的一个共享指针  228行
+         // for point cloud viewing
+         shared_ptr<PointCloudMapping> mpPointCloudMapping;
+    
+    
+    
