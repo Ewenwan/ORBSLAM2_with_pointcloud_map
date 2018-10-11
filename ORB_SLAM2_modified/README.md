@@ -52,9 +52,9 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
 
     /Thirdparty/g2o/config.h
 
-> 4. 点云可视化器 类 线程 等修改
-
-    ORB_SLAM2-pc/include/System.h  39行  和 180行
+> 4. 点云可视化器 类 线程 等 头文件修改
+```c
+    a. ORB_SLAM2-pc/include/System.h  39行  和 180行
           // for point cloud viewing     39行
           #include "pointcloudmapping.h" // 包含 构建点云地图 头文件
           class PointCloudMapping;       // 声明 构建点云地图类
@@ -62,7 +62,7 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
           // point cloud mapping        180行
           shared_ptr<PointCloudMapping> mpPointCloudMapping; // 构建点云地图类的一个共享指针 shared_ptr
           
-    ORB_SLAM2-pc/include/Tracking.h  42行 和 
+    b. ORB_SLAM2-pc/include/Tracking.h  42行 和 
           // for pointcloud mapping and viewing   42 行
           #include "pointcloudmapping.h" // 包含 构建点云地图 头文件
           class PointCloudMapping;       // 声明 构建点云地图类
@@ -82,6 +82,22 @@ Before all the cmd, **DONOT** forget to download the Vocabulary form the [origin
          // protected 类型的 成员变量 多了一个 构建点云地图类的一个共享指针  228行
          // for point cloud viewing
          shared_ptr<PointCloudMapping> mpPointCloudMapping;
+         
+    c. 构建点云地图类 头文件
+         ORB_SLAM2-pc/include/pointcloudmapping.h
+
+> 5. System.cc 源文件修改
+
+
+> 6. Tracking.cc 源文件修改
+
+
+
+> 7. pointcloudmapping.cc 源文件分析
+
+
+
+```
     
     
     
